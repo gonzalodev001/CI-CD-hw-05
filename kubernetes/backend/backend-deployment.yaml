@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: todolist-backend
+  labels:
+    app: todolist-backend
+  namespace: part-second
+spec: 
+  replicas: 3
+  selector:
+    matchLabels:
+      app: todolist-backend
+  template:
+    metadata:
+      labels:
+        app: todolist-backend
+    spec:
+      containers:
+      - name: todolist-backend
+        image: todolist-backend
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 20m
+            memory: 128Mi
+          requests:
+            cpu: 20m
+            memory: 128Mi

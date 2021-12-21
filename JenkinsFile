@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+    stages {
+    	stage ('git clone app') {
+            steps {
+                script {
+                    echo 'git clone https://github.com/gonzalodev001/symfony_todolist.git'
+                }
+            }
+        }
+        stage ('Build app') {
+            steps {
+                script {
+                    echo 'sh docker-compose -f docker-compose.yml'
+                    echo 'sh docker-compose up -d'
+                }
+            }
+        }
+        stage ('Preper app') {
+            steps {
+                script {
+                    echo 'sh docker exec -i symfony-db mysql -uroot < ./database/photodb.sql'
+                    echo 'sh docker exec symfony-backend composer install --no-interaction'
+                    echo 'sh docker exec symfony-backend bin/console doctrine:migration:migrate'
+                }
+            }
+        }
+        stage ('Run testing') {
+            steps {
+                script {
+                    echo 'sh docker exec todolist-backend bin/phpunit'
+                    echo 'sh docker exec todolist-backend vendor/bin/behat'
+                }
+            }
+        }
+        stage ('Build image') {
+            steps {
+                script {
+                    echo 'sh docker build -t gonzadev001/todolist-backend:v.1.0'
+                    echo 'sh docker build -t gonzadev001/todolist-db:v.1.0'
+                }
+            }
+        }
+        stage ('Push Realese image') {
+            steps {
+                script {
+                    echo 'Publishing......'
+                    echo 'sh docker push gonzadev001/todolist-backend:v.1.0'
+                    echo 'sh docker push gonzadev001/todolist-db:v.1.0'
+                }
+            }
+        }
+        stage ('Deploy kubernetes') {
+            steps {
+                script {
+                    echo 'Deploying......'
+                    echo 'sh kubectl apply -f nginx-deployment.yaml'
+                    echo 'sh kubectl apply -f nginx-service.yaml'
+                    echo 'sh kubectl apply -f backend-deployment.yaml'
+                    echo 'sh kubectl apply -f backend-service.yaml'
+                    echo 'sh kubectl apply -f database-deployment.yaml'
+                    echo 'sh kubectl apply -f database-service.yaml'
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: todolist-db
+  labels:
+    app: todolist-db
+  namespace: part-second
+spec: 
+  replicas: 3
+  selector:
+    matchLabels:
+      app: todolist-db
+  template:
+    metadata:
+      labels:
+        app: todolist-db
+    spec:
+      containers:
+      - name: todolist-db
+        image: todolist-db
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            cpu: 20m
+            memory: 128Mi
+          requests:
+            cpu: 20m
+            memory: 128Mi
